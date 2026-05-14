@@ -1,8 +1,30 @@
 # Chromium Anti-Detect Engine
 
+[![npm version](https://img.shields.io/npm/v/fingerprint-chromium-engine.svg)](https://www.npmjs.com/package/fingerprint-chromium-engine)
+[![Chromium](https://img.shields.io/badge/chromium-149.0.7827.3-blue.svg)](https://www.chromium.org/Home)
+[![Node.js](https://img.shields.io/badge/node-%3E%3D18-green.svg)](https://nodejs.org/)
+[![Playwright](https://img.shields.io/badge/playwright-compatible-2ea44f.svg)](https://playwright.dev)
+[![JavaScript](https://img.shields.io/badge/JavaScript-Supported-yellow.svg)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
+[![CommonJS](https://img.shields.io/badge/CommonJS-Supported-green.svg)](https://nodejs.org/)
+
 Thư viện điều khiển trình duyệt Chromium chống bot detection, tích hợp fingerprint, proxy và quản lý profile đa phiên.
 
-Được xây dựng trên nền `playwright-core` — tương thích hoàn toàn với Playwright API hiện có, không cần viết lại code nghiệp vụ.
+Được xây dựng trên nền `playwright-core` -- tương thích hoàn toàn với Playwright API hiện có, không cần viết lại code nghiệp vụ.
+
+**Tài liệu:** [Documentation](https://playwright.dev) | [API Reference](https://playwright.dev/docs/api/class-playwright)
+**Mã nguồn:** [GitHub](https://github.com/maxlogvn/PrivateChromiumEngine)
+**NPM:** [fingerprint-chromium-engine](https://www.npmjs.com/package/fingerprint-chromium-engine)
+
+---
+
+## Yêu cầu hệ thống
+
+| Yêu cầu | Chi tiết |
+|---|---|
+| Hệ điều hành | Windows (bắt buộc) |
+| Node.js | 18+ |
+| Playwright | Cần cài `playwright-core` sebagai peer dependency |
+| Chromium | 149.0.7827.3 (đi kèm sẵn trong engine, đã được patch) |
 
 ---
 
@@ -12,62 +34,11 @@ Thư viện điều khiển trình duyệt Chromium chống bot detection, tích
 npm install fingerprint-chromium-engine
 ```
 
-> **Lưu ý:** Thư viện yêu cầu `playwright-core` là peer dependency.
-> Nếu dự án chưa có, cần cài thêm:[microsoft/playwright](https://github.com/microsoft/playwright)
->
+Nếu dự án chưa có `playwright-core`, cần cài thêm:
 
----
-
-## Tính năng
-
-### Fingerprint từ thiết bị thật, inject ở tầng C native
-
-Không sinh fingerprint ngẫu nhiên — engine sử dụng fingerprint thu thập từ các thiết bị thực tế, sau đó inject trực tiếp vào Chromium ở cấp độ C/C++. Kết quả là mọi thuộc tính đều trả về giá trị native, không có dấu hiệu bị override dưới bất kỳ hình thức kiểm tra nào.
-
-**Navigator & Platform**
-- Navigator properties (thiết bị, trình duyệt, locale, OS...)
-- Network headers `Accept-Language` và `User-Agent` tự động khớp với navigator
-- Kích thước & độ phân giải màn hình, inner/outer viewport
-- `devicePixelRatio` & HiDPI/Retina screen emulation
-
-**Đồ họa**
-- WebGL parameters, supported extensions, context attributes & shader precision formats
-- Canvas 2D — thêm nhiễu chống canvas fingerprinting
-- Font fingerprinting (hỗ trợ FontPack đồng bộ font hệ thống)
-
-**Media & Hardware**
-- AudioContext sample rate, output latency & max channel count
-- Device voices & speech playback rates
-- Số lượng microphone, webcam, speaker available
-- Battery API, Sensor API (gia tốc kế, con quay hồi chuyển)
-- ClientRects & DOM element coordinates
-
-**Mạng & Vị trí**
-- WebRTC IP spoofing ở tầng protocol — không thể bị detect qua JS
-- Geolocation, timezone & locale
-
-### Proxy & Môi trường thông minh
-
-Không chỉ định tuyến traffic — engine tự động đồng bộ toàn bộ môi trường trình duyệt theo IP proxy:
-
-- Timezone — múi giờ tự động khớp với vị trí địa lý của proxy
-- Ngôn ngữ — `Accept-Language`, `navigator.language` theo quốc gia proxy
-- Geolocation — vị trí địa lý theo IP (tuỳ chọn)
-- WebRTC — che giấu hoặc thay thế IP rò rỉ qua WebRTC
-- DNS tùy chỉnh — hỗ trợ `custom-proxy` và `custom-direct` để tránh DNS leak
-- QUIC — tùy chọn bật giao thức QUIC nếu proxy hỗ trợ UDP
-
-### Profile đa phiên
-
-Duy trì trạng thái đăng nhập, cookies, localStorage và lịch sử giữa các lần chạy:
-
-- Mỗi profile độc lập, được lưu theo đường dẫn tùy chọn
-- Tự động khôi phục fingerprint và proxy đã dùng ở phiên trước
-- Lưu profile khi đóng — có thể chỉ định đường dẫn lưu khác nhau mỗi lần
-
-### Tương thích Playwright 100%
-
-Trả về `BrowserContext` chuẩn của `playwright-core`. Toàn bộ API Playwright (`page`, `locator`, `expect`, `route`...) hoạt động bình thường — không cần thay đổi code nghiệp vụ.
+```bash
+npm install playwright-core
+```
 
 ---
 
@@ -77,11 +48,11 @@ Trả về `BrowserContext` chuẩn của `playwright-core`. Toàn bộ API Play
 import { Chromium } from 'fingerprint-chromium-engine';
 
 const context = await Chromium
-  .useFingerprint(fingerprintData)
-  .useProxy('http://user:pass@127.0.0.1:8080')
-  .useProfile('./profiles/user_01')
-  .launch({ headless: false })
-  .newContext();
+    .useFingerprint(fingerprintData)
+    .useProxy('http://user:pass@127.0.0.1:8080')
+    .useProfile('./profiles/user_01')
+    .launch({ headless: false })
+    .newContext();
 
 const page = await context.newPage();
 await page.goto('https://example.com');
@@ -89,37 +60,99 @@ await page.goto('https://example.com');
 await Chromium.quit();
 ```
 
-> Tất cả method cấu hình (`use*`) trả về `this` — hỗ trợ method chaining.
-> Bắt buộc gọi trước `launch()`. Sau khi `launch()`, cấu hình bị khóa.
+Ghi chú:
+- Tất cả method cấu hình (`use*`) trả về `this`, hỗ trợ method chaining.
+- Các method `use*` phải gọi trước `launch()`. Sau khi `launch()`, cấu hình bị khóa.
 
 ---
 
-## Hướng dẫn sử dụng
+## Tính năng chính
+
+### 1. Fingerprint từ thiết bị thật, inject ở tầng C native
+
+Engine không sinh fingerprint ngẫu nhiên. Thay vào đó, nó sử dụng fingerprint thu thập từ thiết bị thực tế, rồi inject trực tiếp vào Chromium ở cấp độ C/C++. Mọi thuộc tính đều trả về giá trị native, không có dấu hiệu bị override dưới bất kỳ hình thức kiểm tra nào.
+
+**Navigator và Platform**
+- Navigator properties (thiết bị, trình duyệt, locale, OS)
+- Network headers `Accept-Language` và `User-Agent` tự động khớp với navigator
+- Kích thước và độ phân giải màn hình, inner/outer viewport
+- `devicePixelRatio` và HiDPI/Retina screen emulation
+
+**Đồ họa**
+- WebGL parameters, supported extensions, context attributes, shader precision formats
+- Canvas 2D -- thêm nhiễu chống canvas fingerprinting
+- Font fingerprinting (hỗ trợ FontPack đồng bộ font hệ thống)
+
+**Media và Hardware**
+- AudioContext sample rate, output latency, max channel count
+- Device voices và speech playback rates
+- Số lượng microphone, webcam, speaker available
+- Battery API, Sensor API (gia tốc kế, con quay hồi chuyển)
+- ClientRects và DOM element coordinates
+
+**Mạng và Vị trí**
+- WebRTC IP spoofing ở tầng protocol -- không thể bị detect qua JS
+- Geolocation, timezone, locale
+
+---
+
+### 2. Proxy và môi trường thông minh
+
+Engine không chỉ định tuyến traffic. Nó tự động đồng bộ toàn bộ môi trường trình duyệt theo IP proxy:
+
+| Thuộc tính | Hành vi tự động |
+|---|---|
+| Timezone | Múi giờ khớp với vị trí địa lý của proxy |
+| Ngôn ngữ | `Accept-Language`, `navigator.language` theo quốc gia proxy |
+| Geolocation | Vị trí địa lý theo IP (tùy chọn) |
+| WebRTC | Che giấu hoặc thay thế IP rò rỉ |
+| DNS | Hỗ trợ `custom-proxy` và `custom-direct` để tránh DNS leak |
+| QUIC | Tùy chọn bật nếu proxy hỗ trợ UDP |
+
+---
+
+### 3. Profile đa phiên
+
+Duy trì trạng thái đăng nhập, cookies, localStorage và lịch sử giữa các lần chạy:
+
+- Mỗi profile độc lập, được lưu theo đường dẫn tùy chọn
+- Tự động khôi phục fingerprint và proxy đã dùng ở phiên trước
+- Lưu profile khi đóng -- có thể chỉ định đường dẫn lưu khác nhau mỗi lần
+
+---
+
+### 4. Tương thích Playwright 100%
+
+Trả về `BrowserContext` chuẩn của `playwright-core`. Toàn bộ API Playwright (`page`, `locator`, `expect`, `route`...) hoạt động bình thường -- không cần thay đổi code nghiệp vụ.
+
+---
+
+## Hướng dẫn sử dụng chi tiết
 
 ### Fingerprint
 
 ```ts
 Chromium.useFingerprint(fingerprintData, {
-  usePerfectCanvas: true,   // Canvas chính xác theo fingerprint
-  safeWebGL: true,          // Che giấu GPU renderer & vendor
-  safeAudio: true,          // Che giấu thông tin audio hardware
-  useFontPack: true,        // Đồng bộ font với fingerprint mục tiêu
+    usePerfectCanvas: true,   // Canvas chính xác theo fingerprint
+    safeWebGL: true,          // Che giấu GPU renderer và vendor
+    safeAudio: true,          // Che giấu thông tin audio hardware
+    useFontPack: true,        // Đồng bộ font với fingerprint mục tiêu
 })
 ```
 
-> `useFontPack` yêu cầu cài đặt [FontPack từ Bablosoft](https://wiki.bablosoft.com/doku.php?id=fontpack). Nếu chưa cài, engine tự fallback.
+`useFontPack` yêu cầu cài đặt [FontPack từ Bablosoft](https://wiki.bablosoft.com/doku.php?id=fontpack). Nếu chưa cài, engine tự fallback.
 
 | Tùy chọn | Mô tả | Mặc định |
 |---|---|---|
 | `emulateDeviceScaleFactor` | Giả lập màn hình HiDPI/Retina. Render ở độ phân giải cao hơn, tốn thêm tài nguyên. Các giá trị JS như `devicePixelRatio` luôn được thay thế đúng dù bật hay tắt | `true` |
-| `emulateSensorAPI` | Giả lập Sensor API (gia tốc kế, con quay hồi chuyển...). Nên bật khi giả lập fingerprint thiết bị di động | `true` |
+| `emulateSensorAPI` | Giả lập Sensor API (gia tốc kế, con quay hồi chuyển). Nên bật khi giả lập fingerprint thiết bị di động | `true` |
 | `usePerfectCanvas` | Thay thế dữ liệu Canvas chính xác theo fingerprint. Yêu cầu fingerprint phải chứa dữ liệu PerfectCanvas | `true` |
 | `useFontPack` | Đồng bộ font hệ thống theo fingerprint, tránh sai lệch khi fingerprint mục tiêu có nhiều font hơn máy hiện tại | `true` |
 | `safeElementSize` | Che giấu tọa độ thực của DOM element, chống ClientRects fingerprinting | `false` |
 | `safeBattery` | Giả lập Battery API với giá trị khác nhau mỗi phiên. Trả về 100% nếu thiết bị gốc không có Battery API | `true` |
 | `safeCanvas` | Thêm nhiễu vào Canvas 2D để chống canvas fingerprinting | `true` |
 | `safeAudio` | Thêm nhiễu vào Web Audio API, che giấu sample rate và số kênh âm thanh | `true` |
-| `safeWebGL` | Thêm nhiễu vào WebGL, che giấu tên GPU renderer & vendor | `true` |
+| `safeWebGL` | Thêm nhiễu vào WebGL, che giấu tên GPU renderer và vendor | `true` |
 
 ---
 
@@ -127,14 +160,14 @@ Chromium.useFingerprint(fingerprintData, {
 
 ```ts
 Chromium.useProxy('http://user:pass@127.0.0.1:8080', {
-  changeBrowserLanguage: true, // Đồng bộ ngôn ngữ trình duyệt theo quốc gia proxy
-  changeTimezone: true,        // Đồng bộ múi giờ theo IP proxy
-  changeGeolocation: false,    // Đồng bộ vị trí địa lý (mặc định tắt)
-  changeWebRTC: 'replace',     // Thay IP WebRTC bằng IP proxy
+    changeBrowserLanguage: true, // Đồng bộ ngôn ngữ trình duyệt theo quốc gia proxy
+    changeTimezone: true,        // Đồng bộ múi giờ theo IP proxy
+    changeGeolocation: false,    // Đồng bộ vị trí địa lý (mặc định tắt)
+    changeWebRTC: 'replace',     // Thay IP WebRTC bằng IP proxy
 })
 ```
 
-**Tùy chọn cơ bản:**
+#### Tùy chọn cơ bản
 
 | Tùy chọn | Mô tả | Mặc định |
 |---|---|---|
@@ -144,11 +177,11 @@ Chromium.useProxy('http://user:pass@127.0.0.1:8080', {
 | `enableTunneling` | Bật/tắt hệ thống tunneling tích hợp. Tắt khi đã có VPN hoặc muốn kết nối trực tiếp | `true` |
 | `enableQUIC` | Bật giao thức QUIC (UDP). Chỉ bật nếu proxy server hỗ trợ UDP | `false` |
 
-**Tùy chọn WebRTC:**
+#### Tùy chọn WebRTC
 
 | Giá trị `changeWebRTC` | Hành vi |
 |---|---|
-| `enable` | Bật WebRTC — lộ IP thật |
+| `enable` | Bật WebRTC -- lộ IP thật |
 | `disable` | Tắt hoàn toàn WebRTC |
 | `replace` | Thay IP WebRTC bằng IP proxy (khuyến nghị) |
 
@@ -156,11 +189,11 @@ Khi dùng `changeWebRTC: 'replace'`, có thể kiểm soát chi tiết IP hiển
 
 ```ts
 Chromium.useProxy('http://...', {
-  changeWebRTC: 'replace',
-  publicIPv4: 'auto',     // tự lấy IPv4 công khai từ proxy
-  publicIPv6: 'disable',  // ẩn IPv6 công khai
-  privateIPv4: 'local',   // dùng IP nội bộ thực của máy
-  privateIPv6: 'disable', // ẩn IPv6 nội bộ
+    changeWebRTC: 'replace',
+    publicIPv4: 'auto',     // tự lấy IPv4 công khai từ proxy
+    publicIPv6: 'disable',  // ẩn IPv6 công khai
+    privateIPv4: 'local',   // dùng IP nội bộ thực của máy
+    privateIPv6: 'disable', // ẩn IPv6 nội bộ
 })
 ```
 
@@ -171,23 +204,23 @@ Chromium.useProxy('http://...', {
 | `privateIPv4` | IPv4 nội bộ hiển thị qua WebRTC. Nhận `'local'`, `'disable'`, IP cụ thể hoặc dải `'private class a/b/c'` | `'local'` |
 | `privateIPv6` | IPv6 nội bộ hiển thị qua WebRTC. Nhận `'local'`, `'disable'`, IP cụ thể hoặc `'unique local address'` | `'local'` |
 
-**Tùy chọn tra cứu IP:**
+#### Tùy chọn tra cứu IP
 
 | Tùy chọn | Mô tả | Mặc định |
 |---|---|---|
 | `detectExternalIP` | Tự động phát hiện IP công khai thực qua proxy. Hữu ích khi IP kết nối proxy khác IP hiển thị ra ngoài. Có thể cấu hình riêng cho IPv4/IPv6 | `true` |
-| `ipInfoMethod` | Phương thức tra cứu thông tin địa lý từ IP. `'database'` — nội bộ, nhanh nhưng kém chính xác. `'ip-api.com'` — bên ngoài, chính xác hơn nhưng giới hạn 45 request/phút/IP (bản free) | `'database'` |
+| `ipInfoMethod` | Phương thức tra cứu thông tin địa lý từ IP. `'database'` -- nội bộ, nhanh nhưng kém chính xác. `'ip-api.com'` -- bên ngoài, chính xác hơn nhưng giới hạn 45 request/phút/IP (bản free) | `'database'` |
 | `ipInfoKey` | API key của [ip-api.com](https://ip-api.com/) bản trả phí. Chỉ có hiệu lực khi `ipInfoMethod` là `'ip-api.com'` | `''` |
 
-**Tùy chọn nguồn lấy IP tùy chỉnh:**
+#### Tùy chọn nguồn lấy IP tùy chỉnh
 
 Dùng khi cần lấy IP công khai từ một service riêng thay vì service mặc định:
 
 ```ts
 Chromium.useProxy('http://...', {
-  ipExtractionURL: 'https://api.myservice.com/ip',
-  ipExtractionMethod: 'jsonpath',
-  ipExtractionParam: '$.ip',
+    ipExtractionURL: 'https://api.myservice.com/ip',
+    ipExtractionMethod: 'jsonpath',
+    ipExtractionParam: '$.ip',
 })
 ```
 
@@ -195,9 +228,9 @@ Có thể cấu hình riêng cho IPv4 và IPv6:
 
 ```ts
 Chromium.useProxy('http://...', {
-  ipExtractionURL: { v4: 'https://ipv4.service.com', v6: 'https://ipv6.service.com' },
-  ipExtractionMethod: { v4: 'raw', v6: 'jsonpath' },
-  ipExtractionParam: { v4: '', v6: '$.ip' },
+    ipExtractionURL: { v4: 'https://ipv4.service.com', v6: 'https://ipv6.service.com' },
+    ipExtractionMethod: { v4: 'raw', v6: 'jsonpath' },
+    ipExtractionParam: { v4: '', v6: '$.ip' },
 })
 ```
 
@@ -207,12 +240,12 @@ Chromium.useProxy('http://...', {
 | `ipExtractionMethod` | Phương thức trích xuất IP từ response: `'raw'`, `'jsonpath'`, `'xpath'`, `'regexp'` | `'raw'` |
 | `ipExtractionParam` | Tham số dùng để trích xuất, kết hợp với `ipExtractionMethod` | `''` |
 
-**Tùy chọn DNS:**
+#### Tùy chọn DNS
 
 ```ts
 Chromium.useProxy('http://...', {
-  dnsMode: 'custom-direct', // phân giải DNS cục bộ, traffic còn lại qua proxy
-  dnsIP: '1.1.1.1',
+    dnsMode: 'custom-direct', // phân giải DNS cục bộ, traffic còn lại qua proxy
+    dnsIP: '1.1.1.1',
 })
 ```
 
@@ -222,21 +255,22 @@ Chromium.useProxy('http://...', {
 | `custom-proxy` | Dùng DNS tùy chỉnh của Chrome, truy vấn DNS qua proxy (proxy phải hỗ trợ UDP) |
 | `custom-direct` | Dùng DNS tùy chỉnh của Chrome, phân giải DNS cục bộ, traffic còn lại qua proxy (khuyến nghị) |
 
-> Khi dùng `custom-proxy` hoặc `custom-direct`, cần chỉ định `dnsIP`. Mặc định `dnsIP` là `'1.1.1.1'`.
-> `custom-proxy` yêu cầu proxy hỗ trợ UDP. Nếu proxy chỉ hỗ trợ TCP, dùng `custom-direct` hoặc `system-proxy`.
+Lưu ý:
+- Khi dùng `custom-proxy` hoặc `custom-direct`, cần chỉ định `dnsIP`. Mặc định `dnsIP` là `'1.1.1.1'`.
+- `custom-proxy` yêu cầu proxy hỗ trợ UDP. Nếu proxy chỉ hỗ trợ TCP, dùng `custom-direct` hoặc `system-proxy`.
 
 ---
 
 ### Profile
 
 ```ts
-// Lần đầu — tạo mới profile
+// Lần đầu -- tạo mới profile
 Chromium.useProfile('./profiles/user_01')
 
-// Các lần sau — tự động khôi phục session, proxy, fingerprint
+// Các lần sau -- tự động khôi phục session, proxy, fingerprint
 Chromium.useProfile('./profiles/user_01', {
-  loadProxy: true,       // khôi phục proxy từ phiên trước
-  loadFingerprint: true, // khôi phục fingerprint từ phiên trước
+    loadProxy: true,       // khôi phục proxy từ phiên trước
+    loadFingerprint: true, // khôi phục fingerprint từ phiên trước
 })
 ```
 
@@ -256,49 +290,50 @@ Engine đi kèm một bản Chromium đã được patch sẵn để chống det
 Chromium.repackChromium(customLauncher)
 ```
 
-> **Cảnh báo:** Chỉ dùng `repackChromium()` khi có lý do đặc biệt và hiểu rõ rủi ro. Launcher tùy chỉnh có thể không được patch đầy đủ, dẫn đến tăng nguy cơ bị detect.
+Cảnh báo: Chỉ dùng `repackChromium()` khi có lý do đặc biệt và hiểu rõ rủi ro. Launcher tùy chỉnh có thể không được patch đầy đủ, dẫn đến tăng nguy cơ bị detect.
 
 ---
 
 ### Vòng đời trình duyệt
 
-```ts
-// 1. Cấu hình (có thể chaining)
-Chromium
-  .useFingerprint(data)
-  .useProxy('http://...')
-  .useProfile('./profiles/user_01')
+```
+Bước 1: Cấu hình (có thể chaining)
+  Chromium.useFingerprint(data).useProxy('http://...').useProfile('./profiles/user_01')
 
-// 2. Khởi tạo engine — chỉ gọi một lần
+Bước 2: Khởi tạo engine (chỉ gọi một lần)
   .launch({ headless: false })
 
-// 3. Mở phiên duyệt
-const context = await Chromium.newContext();
-const page = await context.newPage();
+Bước 3: Mở phiên duyệt
+  const context = await Chromium.newContext();
+  const page = await context.newPage();
 
-// 4. Đóng và lưu
-await Chromium.quit();
+Bước 4: Đóng và lưu
+  await Chromium.quit();
 ```
 
-> `launch()` chỉ được gọi một lần. Gọi lại sẽ ném lỗi.
-> `newContext()` chỉ cho phép một context tại một thời điểm. Gọi `quit()` trước khi tạo context mới.
+Quy tắc:
+- `launch()` chỉ được gọi một lần. Gọi lại sẽ ném lỗi.
+- `newContext()` chỉ cho phép một context tại một thời điểm. Gọi `quit()` trước khi tạo context mới.
+- Thứ tự gọi đúng: `use*` --> `launch()` --> `newContext()` --> `quit()`. Sai thứ tự sẽ ném lỗi có mô tả rõ ràng.
 
 ---
 
-## Lưu ý
+## Lưu ý quan trọng
 
-**Giá trị mặc định `changeGeolocation`** — mặc định là `false`. Khi tắt, trình duyệt sẽ từ chối mọi yêu cầu truy cập vị trí từ trang web.
+**changeGeolocation mặc định tắt** -- Khi tắt, trình duyệt từ chối mọi yêu cầu truy cập vị trí từ trang web.
 
-**IP Geolocation với ip-api.com** — bản free giới hạn 45 request/phút/IP. Vượt quá giới hạn nhận HTTP 429. Cân nhắc dùng bản Pro với `ipInfoKey` hoặc chuyển về `ipInfoMethod: 'database'` khi scale lớn.
+**ip-api.com giới hạn rate** -- Bản free giới hạn 45 request/phút/IP. Vượt quá giới hạn nhận HTTP 429. Cân nhắc dùng bản Pro với `ipInfoKey` hoặc chuyển về `ipInfoMethod: 'database'` khi scale lớn.
 
-**FontPack** — cần tải và cài đặt riêng từ [Bablosoft Wiki](https://wiki.bablosoft.com/doku.php?id=fontpack) để `useFontPack` hoạt động đúng.
+**FontPack cần cài đặt riêng** -- Tải và cài đặt từ [Bablosoft Wiki](https://wiki.bablosoft.com/doku.php?id=fontpack) để `useFontPack` hoạt động đúng. Nếu chưa cài, engine tự fallback.
 
-**Thứ tự gọi** — `use*` -> `launch()` -> `newContext()` -> `quit()`. Sai thứ tự sẽ ném lỗi có mô tả rõ ràng.
+**Thứ tự gọi bắt buộc** -- `use*` --> `launch()` --> `newContext()` --> `quit()`. Sai thứ tự sẽ ném lỗi có mô tả rõ ràng.
+
+**Chỉ hỗ trợ Windows** -- Engine hiện tại chỉ chạy trên hệ điều hành Windows.
 
 ---
 
-## Đóng góp & Hỗ trợ
+## Đóng góp và Hỗ trợ
 
-Gặp vấn đề hoặc muốn đề xuất tính năng — tạo Issue hoặc Pull Request tại:
+Gặp vấn đề hoặc muốn đề xuất tính năng -- tạo Issue hoặc Pull Request tại:
 
 https://github.com/maxlogvn/PrivateChromiumEngine/issues
