@@ -4,8 +4,6 @@
 [![Chromium](https://img.shields.io/badge/chromium-149.0.7827.3-blue.svg)](https://www.chromium.org/Home)
 [![Node.js](https://img.shields.io/badge/node-%3E%3D18-green.svg)](https://nodejs.org/)
 [![Playwright](https://img.shields.io/badge/playwright-compatible-2ea44f.svg)](https://playwright.dev)
-[![JavaScript](https://img.shields.io/badge/JavaScript-Supported-yellow.svg)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
-[![CommonJS](https://img.shields.io/badge/CommonJS-Supported-green.svg)](https://nodejs.org/)
 
 Thư viện điều khiển trình duyệt Chromium chống bot detection, tích hợp fingerprint, proxy và quản lý profile đa phiên.
 
