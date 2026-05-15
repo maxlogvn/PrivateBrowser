@@ -563,6 +563,4 @@ interface PWChromium {
     quit(saveDataPath?: string): Promise<void>;
 }
 
-declare const PACKAGE_PATH: string;
-
-export { Chromium, type FetchOptions, type FingerprintOptions, type Launcher, PACKAGE_PATH, type PWChromium, type PluginLaunchOptions, type ProfileOptions, type ProxyOptions };
+export { Chromium, type FetchOptions, type FingerprintOptions, type Launcher, type PWChromium, type PluginLaunchOptions, type ProfileOptions, type ProxyOptions };
