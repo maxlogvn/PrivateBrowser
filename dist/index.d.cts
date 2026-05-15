@@ -407,19 +407,18 @@ interface FetchOptions {
 type PluginLaunchOptions = Parameters<BrowserType['launchPersistentContext']>[1];
 type Launcher = Pick<BrowserType, 'launch' | 'launchPersistentContext'>;
 /**
- * Factory function tao mot instance BrowserEngine moi.
+ * Namespace điều khiển trình duyệt Chromium.
  *
  * @example
- * const browser = Chromium
+ * const browser = Chromium.launch()
  *   .useFingerprint(fp)
- *   .useProxy(proxy)
- *   .launch();
+ *   .useProxy('http://user:pass@host:port')
+ *   .useProfile('./profiles/user_01');
  *
  * const context = await browser.newContext();
+ * await browser.quit();
  */
-declare const Chromium: ((privateKey?: string) => PWChromium) & {
-    launch: (options?: Partial<PluginLaunchOptions>) => PWChromium;
-};
+declare const Chromium: () => PWChromium;
 
 /**
  * Interface điều khiển trình duyệt Chromium với hỗ trợ fingerprint, proxy và profile.
